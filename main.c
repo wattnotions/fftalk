@@ -129,11 +129,13 @@ void setup (void) {
 void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void) {
 	IFS0bits.INT0IF = 0;
 	count++;
-	debug_led = 1;
+	debug_led = 1;;
 	
 }
 
-void _INT2Interrupt () {
+void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void) {
+	IFS1bits.INT2IF = 0;
+	debug_led = 0;
 	count--;
 }
 
