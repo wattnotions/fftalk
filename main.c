@@ -15,7 +15,10 @@
 #define t2_flag IFS0bits.T2IF
 #define t3_flag IFS0bits.T3IF
 #define t4_flag IFS1bits.T4IF
-#define button1 _
+#define button1 _RE8
+#define button2 _RD1
+#define debug_led _RC14
+
 
 _FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
 _FWDT(WDT_OFF);                  	//Turn off the Watch-Dog Timer.  
@@ -28,6 +31,7 @@ _FGS(CODE_PROT_OFF);
 void setup(void);
 void ir_38khz_blink1(void);
 void ir_38khz_blink2(void);
+void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void);
 
 
 //variables
@@ -38,7 +42,14 @@ int main(void)
 {
     
     setup();
+	debug_led = 0;
 	
+	
+	
+	while(1);
+	
+	
+	/*
     while(1){
 		
 	
@@ -54,7 +65,7 @@ int main(void)
 			t1_flag = 0;
 		}	
 		
-	}
+	}*/
 }
 
 void setup (void) {
@@ -89,11 +100,14 @@ void setup (void) {
 	f1_pin_dir = 0;
 	f2_pin_dir = 0;
 	f_select_led_dir = 0;
-	
+	_TRISC14 = 0; //debug led pin output
 	f_select_dir = 1;
+	_TRISD1 = 1; //int0 pin input
+	_TRISE8 = 1; //int2 pin input
+	
 	
 	//setup interrups int0 and int2
-	SRbits.IPL = 6; //cpu priority
+	//SRbits.IPL = 6; //cpu priority
 	IEC0bits.INT0IE = 1;//external int enable
 	IEC1bits.INT2IE = 1;
 	
@@ -112,11 +126,14 @@ void setup (void) {
 	
 }
 
-void _INT0Interrupt () {
+void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void) {
+	IFS0bits.INT0IF = 0;
 	count++;
+	debug_led = 1;
+	
 }
 
-void _INT1Interrupt () {
+void _INT2Interrupt () {
 	count--;
 }
 
