@@ -46,26 +46,7 @@ int main(void)
 	
 		while(1){
 	
-			//while(t1_flag == 0);
 			
-			if(t2_flag){
-				led1_state = ~led1_state;
-				if(led1_state) {
-					f2_pin = ~f2_pin; //500
-				}
-				t2_flag = 0;
-			}
-			
-			
-			if(t3_flag) {
-				led2_state = ~led2_state;
-				if(led2_state){
-					f1_pin = ~f1_pin; //300
-				}
-				t3_flag = 0;
-			}
-			
-			//t1_flag = 0;
 		}	
 		
 	}
@@ -80,7 +61,6 @@ void setup (void) {
 	T1CONbits.TCS = 0  ;     //internal clock
 	
 	//timer 2 is led1 frequency
-	T2CONbits.TON = 1;      //start timer2
 	T2CONbits.TCKPS = 0b01; // 1:8 prescale
 	T2CONbits.TCS = 0 ;    //internal clock
 	
@@ -117,8 +97,24 @@ void setup (void) {
 	IFS1bits.INT2IF = 0;
 	IFS0bits.INT0IF = 0;
 	
-	IPC0bits.INT0IP = 3;  //priority
-	IPC1bits.T2IP = 4;
+	IPC0bits.INT0IP = 4;  //priority
+	IPC1bits.T2IP = 5;
+	
+	//setup timer interrupts
+	_T1IP = 1; 
+	_T1IF = 0;            
+    _T1IE = 1;
+	T1CONbits.TON = 1;      //start timer1
+	
+	_T2IP = 2; 
+	_T2IF = 0;            
+    _T2IE = 1;
+	T2CONbits.TON = 1;      //start timer2
+	
+	_T3IP = 3; 
+	_T3IF = 0;            
+    _T3IE = 1;
+	T3CONbits.TON = 1;      //start timer2
 	
 	
 	
@@ -148,6 +144,7 @@ void set_phase_delay(void) {
 	
 	
 	TMR2 = 0;
+	TMR3 = 0;
 	
 	TMR4 = 0;
 	t4_flag = 0;
@@ -157,5 +154,18 @@ void set_phase_delay(void) {
 	t2_flag = 0;   //reset flags
 	t3_flag = 0;
 	
+}
+
+void __attribute__((__interrupt__, __auto_psv__)) _T2Interrupt(void)
+{
+	_T2IF = 0;
+    debug_led = ~ debug_led;
+	f1_pin = ~f1_pin;
+}
+
+void __attribute__((__interrupt__, __auto_psv__)) _T3Interrupt(void)
+{
+   _T3IF = 0;
+   f2_pin = ~f2_pin;
 }
 
