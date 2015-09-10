@@ -19,19 +19,29 @@
 #define button2 _RD1
 #define debug_led _RC14
 
-
+#pragma config FPR = FRC_PLL16
+#pragma config FOS = FRC
+#pragma config FCKSMEN = CSW_ON_FSCM_OFF
+#pragma config FPWRT = PWRT_OFF	 
+#pragma config BOREN = PBOR_OFF
+#pragma config MCLRE = MCLR_EN
+#pragma config GWRP = GWRP_OFF
+#pragma config GCP = CODE_PROT_OFF
+/*
 _FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
 _FWDT(WDT_OFF);                  	//Turn off the Watch-Dog Timer.  
 _FBORPOR(MCLR_EN & PWRT_OFF);   	// Enable MCLR reset pin and turn off the power-up timers. 
 _FGS(CODE_PROT_OFF);
-
+*/
 
 
 //functions  
 void setup(void);
 void ir_38khz_blink1(void);
 void ir_38khz_blink2(void);
-void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void);
+//void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void);
+//void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void);
+void set_phase_delay(void);
 
 
 //variables
@@ -42,14 +52,7 @@ int main(void)
 {
     
     setup();
-	debug_led = 0;
-	
-	
-	
-	while(1);
-	
-	
-	/*
+
     while(1){
 		
 	
@@ -57,7 +60,9 @@ int main(void)
 	
 			while(t1_flag == 0);
 			if(t2_flag) led1_state = ~led1_state; t2_flag = 0;
-			if(led1_state) f2_pin = ~f2_pin; //500
+			if(led1_state) {
+				f2_pin = ~f2_pin; //500
+			}
 			
 			if(t3_flag) led2_state = ~led2_state; t3_flag = 0;
 			if(led2_state) f1_pin = ~f1_pin; //300
@@ -65,7 +70,7 @@ int main(void)
 			t1_flag = 0;
 		}	
 		
-	}*/
+	}
 }
 
 void setup (void) {
@@ -105,9 +110,8 @@ void setup (void) {
 	_TRISD1 = 1; //int0 pin input
 	_TRISE8 = 1; //int2 pin input
 	
-	
+	/*
 	//setup interrups int0 and int2
-	//SRbits.IPL = 6; //cpu priority
 	IEC0bits.INT0IE = 1;//external int enable
 	IEC1bits.INT2IE = 1;
 	
@@ -119,24 +123,24 @@ void setup (void) {
 	IPC1bits.T2IP = 4;
 	
 	
-	
+	*/
 	
 	
 	
 	
 }
-
+/*
 void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void) {
 	IFS0bits.INT0IF = 0;
 	count++;
-	set_phase_delay(count);
+	set_phase_delay();
 	
 }
 
 void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void) {
 	IFS1bits.INT2IF = 0;
 	count--;
-	set_phase_delay(count);
+	set_phase_delay();
 }
 
 void set_phase_delay(void) {
@@ -147,11 +151,11 @@ void set_phase_delay(void) {
 	
 	TMR4 = 0;
 	t4_flag = 0;
-	while(!t4_flag); // set phase delay
+	//while(!t4_flag); // set phase delay
 	TMR3 = 0;
 	
 	t2_flag = 0;   //reset flags
 	t3_flag = 0;
 	
 }
-
+*/
