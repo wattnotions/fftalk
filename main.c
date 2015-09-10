@@ -22,7 +22,7 @@
 
 
 
-//_FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
+_FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
 _FWDT(WDT_OFF);                  	//Turn off the Watch-Dog Timer.  
 _FBORPOR(MCLR_EN & PWRT_OFF);   	// Enable MCLR reset pin and turn off the power-up timers. 
 _FGS(CODE_PROT_OFF);
@@ -49,6 +49,7 @@ const float width_modulation = 0.000013156;
 double freq;
 double half_period, period;
 int t2_cnt, f1_cyc, f2_cyc;
+int cyc, cyc_max;
  
 int main(void)
 {
@@ -57,19 +58,32 @@ int main(void)
 	debug_led = 1;
     int i;
 
-	f1_cyc = cycles_calculator(500);
+	f1_cyc =(cycles_calculator(500)/2);
 	f2_cyc = cycles_calculator(250);
 	
 	while(1){
-	
-		if(t2_flag){
-			for(i=f1_cyc ; i<f1_cyc ; i++){
-				while(!t1_flag);
-				f1_pin = ~f1_pin;
-				t1_flag = 0;
-				
-			}
+		
+		
+		
+		cyc = 0;
+		while(cyc < f1_cyc){
+			t1_flag = 0;
+			while(!t1_flag);
+			f1_pin = ~f1_pin;
+			t1_flag = 0;
+			cyc++;
 		}
+		
+		t2_flag = 0;
+		f1_pin = 0;
+		
+		while(!t2_flag);
+		
+		
+		
+		
+			
+		
 						
 	}
 }
