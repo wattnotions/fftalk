@@ -19,20 +19,13 @@
 #define button2 _RD1
 #define debug_led _RC14
 
-#pragma config FPR = FRC_PLL16
-#pragma config FOS = FRC
-#pragma config FCKSMEN = CSW_ON_FSCM_OFF
-#pragma config FPWRT = PWRT_OFF	 
-#pragma config BOREN = PBOR_OFF
-#pragma config MCLRE = MCLR_EN
-#pragma config GWRP = GWRP_OFF
-#pragma config GCP = CODE_PROT_OFF
-/*
+
+
 _FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
 _FWDT(WDT_OFF);                  	//Turn off the Watch-Dog Timer.  
 _FBORPOR(MCLR_EN & PWRT_OFF);   	// Enable MCLR reset pin and turn off the power-up timers. 
 _FGS(CODE_PROT_OFF);
-*/
+
 
 
 //functions  
@@ -52,35 +45,18 @@ int main(void)
 {
     
     setup();
-
+	debug_led = 1;
     while(1){
-		
-	
-		while(1){
-	
 
-			while(t1_flag == 0);
+		while(t1_flag == 0);
+			if(t2_flag) led1_state = ~led1_state; t2_flag = 0;
+			if(led1_state) f2_pin = ~f2_pin; //500
 			
-			if(t2_flag){
-				led1_state = ~led1_state; 
-				t2_flag = 0;
-				if(led1_state) {
-					f2_pin = ~f2_pin; //500
-				}
-			}
 			
-			if(t3_flag){ 
-				led2_state = ~led2_state;
-				t3_flag = 0;
-				if(led2_state){
-					f1_pin = ~f1_pin; //300
-				}
-			}
-			
+			if(t3_flag) led2_state = ~led2_state; t3_flag = 0;
+			if(led2_state) f1_pin = ~f1_pin; //300
 			
 			t1_flag = 0;
-
-		}	
 		
 	}
 }
@@ -94,6 +70,7 @@ void setup (void) {
 	T1CONbits.TCS = 0  ;     //internal clock
 	
 	//timer 2 is led1 frequency
+	T2CONbits.TON = 1;
 	T2CONbits.TCKPS = 0b01; // 1:8 prescale
 	T2CONbits.TCS = 0 ;    //internal clock
 	
@@ -123,8 +100,8 @@ void setup (void) {
 	
 	
 	//setup interrups int0 and int2
-	IEC0bits.INT0IE = 1;//external int enable
-	IEC1bits.INT2IE = 1;
+	//IEC0bits.INT0IE = 1;//external int enable
+	//IEC1bits.INT2IE = 1;
 	
 	//flags
 	IFS1bits.INT2IF = 0;
