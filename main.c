@@ -2,6 +2,7 @@
  
 #include <xc.h>
 #include <libpic30.h>
+
  
 #define f2_pin _RD0
 #define f1_pin _RD2
@@ -21,7 +22,7 @@
 
 
 
-_FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
+//_FOSC(CSW_FSCM_OFF & FRC_PLL16);    //   Set up for Internal Fast RC
 _FWDT(WDT_OFF);                  	//Turn off the Watch-Dog Timer.  
 _FBORPOR(MCLR_EN & PWRT_OFF);   	// Enable MCLR reset pin and turn off the power-up timers. 
 _FGS(CODE_PROT_OFF);
@@ -35,29 +36,41 @@ void ir_38khz_blink2(void);
 //void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void);
 //void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void);
 void set_phase_delay(void);
-
+int cycles_calculator(double freq);
 
 //variables
 int led1_state,led2_state;
 int count;
+
+//debugging variables (need to be global)
+double  num_cycles;
+double	width_desired;
+const float width_modulation = 0.000013156;
+double freq;
+double half_period, period;
+int t2_cnt, f1_cyc, f2_cyc;
  
 int main(void)
 {
     
     setup();
 	debug_led = 1;
-    while(1){
+    int i;
 
-		while(t1_flag == 0);
-			if(t2_flag) led1_state = ~led1_state; t2_flag = 0;
-			if(led1_state) f2_pin = ~f2_pin; //500
-			
-			
-			if(t3_flag) led2_state = ~led2_state; t3_flag = 0;
-			if(led2_state) f1_pin = ~f1_pin; //300
-			
-			t1_flag = 0;
-		
+	f1_cyc = cycles_calculator(500);
+	f2_cyc = cycles_calculator(250);
+	
+	while(1){
+	
+		if(t2_flag){
+			for(i=f1_cyc ; i<f1_cyc ; i++){
+				while(!t1_flag);
+				f1_pin = ~f1_pin;
+				t1_flag = 0;
+				
+			}
+		}
+						
 	}
 }
 
@@ -144,6 +157,18 @@ void set_phase_delay(void) {
 	
 	t2_flag = 0;   //reset flags
 	t3_flag = 0;
+	
+}
+
+int cycles_calculator(double freq) {
+	
+	
+	period = 1/freq;
+	half_period = period/2;
+	width_desired = half_period;
+	num_cycles = width_desired / width_modulation;
+	
+	return num_cycles;
 	
 }
 
