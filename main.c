@@ -49,35 +49,48 @@ const float width_modulation = 0.000013156;
 double freq;
 double half_period, period;
 int t2_cnt, f1_cyc, f2_cyc;
-int cyc, cyc_max;
+int cyc1, cyc2, cyc_max;
  
 int main(void)
 {
     
     setup();
 	debug_led = 1;
-    int i;
+    int max_cyc;
 
-	f1_cyc =(cycles_calculator(500)/2);
-	f2_cyc = cycles_calculator(250);
+	f1_cyc =cycles_calculator(250);
+	f2_cyc = cycles_calculator(400);
 	
+	if(f1_cyc<f2_cyc) max_cyc = f2_cyc;
+	else max_cyc = f1_cyc;
+	
+	f1_pin=0;
+	f2_pin=0;
+		
 	while(1){
 		
 		
 		
-		cyc = 0;
-		while(cyc < f1_cyc){
+		
+		cyc1 = 0;
+		cyc2 = 0;
+		while( (cyc1|cyc2) < max_cyc){
 			t1_flag = 0;
 			while(!t1_flag);
-			f1_pin = ~f1_pin;
+			if(cyc1<f1_cyc) f1_pin = ~f1_pin;
+			if(cyc2<f2_cyc) f2_pin = ~f2_pin;
 			t1_flag = 0;
-			cyc++;
+			cyc1++;
+			cyc2++;
 		}
+		
 		
 		t2_flag = 0;
 		f1_pin = 0;
+		f2_pin = 0;
 		
 		while(!t2_flag);
+		debug_led = 0;
 		
 		
 		
