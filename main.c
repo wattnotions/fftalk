@@ -66,7 +66,7 @@ int main(void)
 	
 	f1_pin=0;
 	f2_pin=0;
-		
+		//test
 	while(1){
 		
 		
