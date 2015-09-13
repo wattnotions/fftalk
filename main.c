@@ -60,8 +60,8 @@ int main(void)
 	int cyc1_cnt=0;
 	int	cyc2_cnt=0;
 
-	f1_cyc =cycles_calculator(250);
-	f2_cyc = cycles_calculator(400);
+	f1_cyc =cycles_calculator(100);
+	f2_cyc = cycles_calculator(500);
 	
 	
 	
@@ -78,6 +78,7 @@ int main(void)
 		
 		if(t2_flag) {// 0 is first half (all zero) 1 is 38khz mod (high)
 			cyc1_cnt = ~cyc1_cnt;
+			debug_led = ~debug_led;
 			t2_flag = 0; 
 			cyc1 = 0; 
 		}
@@ -143,8 +144,8 @@ void setup (void) {
 	
 	
 	PR1 = 48; //38khz
-	PR2 = 4863;//400hz 
-	PR3 = 4095; //475hz
+	PR2 = 18727;//100hz 
+	PR3 = 3745; //500hz
 	
 	//setup pins
 	f1_pin_dir = 0;
