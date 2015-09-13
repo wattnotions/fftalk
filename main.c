@@ -37,6 +37,10 @@ void ir_38khz_blink2(void);
 //void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void);
 void set_phase_delay(void);
 int cycles_calculator(double freq);
+void check_flags(void);
+void update_outputs(void);
+int calculate_PRx_val(int freq);
+void calc_reg_values(void);
 
 //variables
 int led1_state,led2_state;
@@ -48,73 +52,37 @@ double	width_desired;
 const float width_modulation = 0.000013156;
 double freq;
 double half_period, period;
-int t2_cnt, f1_cyc, f2_cyc;
+int t2_cnt, f1_cyc, f2_cyc,f1, f2;
 int cyc1, cyc2, cyc_max;
+int max_cyc;
+int cyc1_cnt=0;
+int	cyc2_cnt=0;
+static float tp3 = 0.000000267;
+static int pr_val;
+
  
 int main(void)
 {
     
     setup();
 	debug_led = 1;
-    int max_cyc;
-	int cyc1_cnt=0;
-	int	cyc2_cnt=0;
-
-	f1_cyc =cycles_calculator(100);
-	f2_cyc = cycles_calculator(500);
+	
+	static int freq1, freq2;
+	freq1 = 250;
+	freq2 = 500;
 	
 	
 	
 	f1_pin=0;
-	f2_pin=0;
-	cyc1 = 0;
-	cyc2 = 0;
+	f2_pin=0; //set outputs low
+
 	while(1){
 		
-		
-			
 		t1_flag = 0;
 		while(!t1_flag);
-		
-		if(t2_flag) {// 0 is first half (all zero) 1 is 38khz mod (high)
-			cyc1_cnt = ~cyc1_cnt;
-			debug_led = ~debug_led;
-			t2_flag = 0; 
-			cyc1 = 0; 
-		}
-		
-		if(t3_flag){
-			cyc2_cnt = ~cyc2_cnt;
-			t3_flag = 0;
-			cyc2 = 0;
-		}
-		
-			
-		if(cyc1_cnt){	
-		
-			if(cyc1<f1_cyc){
-				f1_pin = ~f1_pin;
-				cyc1++;
-			}
-			else {
-				f1_pin = 0;
-			}
-		
-			
-		}
-		
-		if(cyc2_cnt){					
-			if(cyc2<f2_cyc){
-				f2_pin = ~f2_pin;
-				cyc2++;
-			}
-			else {
-				f2_pin = 0;
-			}
-			
-		
-		}
-			
+		check_flags();
+		update_outputs();
+	
 	}
 	
 }
@@ -216,6 +184,65 @@ int cycles_calculator(double freq) {
 	return num_cycles;
 	
 }
+
+void check_flags(void){
+	
+	if(t2_flag) {// 0 is first half (all zero) 1 is 38khz mod (high)
+			cyc1_cnt = ~cyc1_cnt;
+			debug_led = ~debug_led;
+			t2_flag = 0; 
+			cyc1 = 0; 
+		}
+	
+	if(t3_flag){
+			cyc2_cnt = ~cyc2_cnt;
+			t3_flag = 0;
+			cyc2 = 0;
+		}
+		
+}
+
+void update_outputs(void){
+	
+	if(cyc1_cnt){	
+		
+			if(cyc1<f1_cyc){
+				f1_pin = ~f1_pin;
+				cyc1++;
+			}
+			else {
+				f1_pin = 0;
+			}
+		
+			
+		}
+		
+		if(cyc2_cnt){					
+			if(cyc2<f2_cyc){
+				f2_pin = ~f2_pin;
+				cyc2++;
+			}
+			else {
+				f2_pin = 0;
+			}
+			
+		
+		}
+}
+
+
+int calculate_PRx_val(int freq){
+	pr_val = (1) / ((tp3)*(2)*(freq));
+	return pr_val;
+}
+
+void calc_reg_values(void){
+	f1_cyc =cycles_calculator(freq1);
+	f2_cyc = cycles_calculator(freq2);
+	PR2 = calculate_PRx_val(freq1);
+	PR3 = calculate_PRx_val(freq2);
+}
+
 
 
 
