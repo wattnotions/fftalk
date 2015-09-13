@@ -57,48 +57,65 @@ int main(void)
     setup();
 	debug_led = 1;
     int max_cyc;
+	int cyc1_cnt=0;
+	int	cyc2_cnt=0;
 
 	f1_cyc =cycles_calculator(250);
 	f2_cyc = cycles_calculator(400);
 	
-	if(f1_cyc<f2_cyc) max_cyc = f2_cyc;
-	else max_cyc = f1_cyc;
+	
 	
 	f1_pin=0;
 	f2_pin=0;
-		//test
+	cyc1 = 0;
+	cyc2 = 0;
 	while(1){
 		
 		
+			
+		t1_flag = 0;
+		while(!t1_flag);
 		
-		
-		cyc1 = 0;
-		cyc2 = 0;
-		while( (cyc1|cyc2) < max_cyc){
-			t1_flag = 0;
-			while(!t1_flag);
-			if(cyc1<f1_cyc) f1_pin = ~f1_pin;
-			if(cyc2<f2_cyc) f2_pin = ~f2_pin;
-			t1_flag = 0;
-			cyc1++;
-			cyc2++;
+		if(t2_flag) {// 0 is first half (all zero) 1 is 38khz mod (high)
+			cyc1_cnt = ~cyc1_cnt;
+			t2_flag = 0; 
+			cyc1 = 0; 
 		}
 		
-		
-		t2_flag = 0;
-		f1_pin = 0;
-		f2_pin = 0;
-		
-		while(!t2_flag);
-		debug_led = 0;
-		
-		
-		
+		if(t3_flag){
+			cyc2_cnt = ~cyc2_cnt;
+			t3_flag = 0;
+			cyc2 = 0;
+		}
 		
 			
+		if(cyc1_cnt){	
 		
-						
+			if(cyc1<f1_cyc){
+				f1_pin = ~f1_pin;
+				cyc1++;
+			}
+			else {
+				f1_pin = 0;
+			}
+		
+			
+		}
+		
+		if(cyc2_cnt){					
+			if(cyc2<f2_cyc){
+				f2_pin = ~f2_pin;
+				cyc2++;
+			}
+			else {
+				f2_pin = 0;
+			}
+			
+		
+		}
+			
 	}
+	
 }
 
 void setup (void) {
