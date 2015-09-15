@@ -22,7 +22,7 @@
 
 
 
-_FOSC(CSW_FSCM_OFF & FRC_PLL16);    // /  Set up for Internal Fast RC
+_FOSC(CSW_FSCM_OFF & FRC_PLL16);    // //  Set up for Internal Fast RC
 _FWDT(WDT_OFF);                  	//Turn off the Watch-Dog Timer.  
 _FBORPOR(MCLR_EN & PWRT_OFF);   	// Enable MCLR reset pin and turn off the power-up timers. 
 _FGS(CODE_PROT_OFF);
