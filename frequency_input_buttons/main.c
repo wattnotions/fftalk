@@ -33,8 +33,8 @@ _FGS(CODE_PROT_OFF);
 void setup(void);
 void ir_38khz_blink1(void);
 void ir_38khz_blink2(void);
-//void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void);
-//void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void);
+void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void);
+void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void);
 void set_phase_delay(void);
 int cycles_calculator(double freq);
 void check_flags(void);
@@ -59,18 +59,22 @@ int cyc1_cnt=0;
 int	cyc2_cnt=0;
 static float tp3 = 0.000000267;
 static int pr_val;
+int freq1 = 250;
+int freq2 = 500;
+
 
  
 int main(void)
 {
     
     setup();
-	debug_led = 1;
 	
-	static int freq1, freq2;
-	freq1 = 250;
-	freq2 = 500;
 	
+	
+	
+	
+	calc_reg_values();
+	debug_led = 0;
 	
 	
 	f1_pin=0;
@@ -126,14 +130,15 @@ void setup (void) {
 	
 	
 	//setup interrups int0 and int2
-	//IEC0bits.INT0IE = 1;//external int enable
-	//IEC1bits.INT2IE = 1;
+	IEC0bits.INT0IE = 1;//external int enable
+	IEC1bits.INT2IE = 1;
 	
 	//flags
 	IFS1bits.INT2IF = 0;
 	IFS0bits.INT0IF = 0;
 	
 	IPC0bits.INT0IP = 4;  //priority
+	IPC5bits.INT2IP = 3;
 	IPC1bits.T2IP = 5;
 	
 	
@@ -145,15 +150,19 @@ void setup (void) {
 
 void __attribute__((__interrupt__, __auto_psv__)) _INT0Interrupt(void) {
 	IFS0bits.INT0IF = 0;
-	count++;
-	set_phase_delay();
+	freq1 = freq1 - 20;
+	debug_led = 1;
+	calc_reg_values();
+	
 	
 }
 
 void __attribute__((__interrupt__, __auto_psv__)) _INT2Interrupt (void) {
 	IFS1bits.INT2IF = 0;
-	count--;
-	set_phase_delay();
+	freq1 = freq1 +20;
+	calc_reg_values();
+	debug_led = 0;
+	
 }
 
 void set_phase_delay(void) {
@@ -181,7 +190,7 @@ int cycles_calculator(double freq) {
 	width_desired = half_period;
 	num_cycles = width_desired / width_modulation;
 	
-	return num_cycles;
+	return num_cycles/2;
 	
 }
 
@@ -189,7 +198,7 @@ void check_flags(void){
 	
 	if(t2_flag) {// 0 is first half (all zero) 1 is 38khz mod (high)
 			cyc1_cnt = ~cyc1_cnt;
-			debug_led = ~debug_led;
+			
 			t2_flag = 0; 
 			cyc1 = 0; 
 		}
@@ -204,7 +213,9 @@ void check_flags(void){
 
 void update_outputs(void){
 	
-	if(cyc1_cnt){	
+	
+	if(cyc1_cnt){
+			
 		
 			if(cyc1<f1_cyc){
 				f1_pin = ~f1_pin;
